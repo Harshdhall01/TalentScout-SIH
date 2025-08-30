@@ -1,0 +1,114 @@
+// Import necessary modules
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+
+// Initialize the router
+const router = express.Router();
+
+// This is a simple in-memory storage for user data.
+// In a real application, you would save this to a database.
+const usersData = [];
+
+// --- Multer Configuration for Video Uploads ---
+const storage = multer.diskStorage({
+    // Set the destination for uploaded files
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    // Set the filename for uploaded files
+    filename: function (req, file, cb) {
+        // Create a unique filename to avoid overwrites: timestamp-originalfilename
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// File filter to accept only video files
+const videoFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('video')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Not a video file! Please upload only videos.'), false);
+    }
+};
+
+// Initialize multer with the storage configuration and file filter
+const upload = multer({ storage: storage, fileFilter: videoFilter });
+
+
+// --- Route Definitions ---
+
+/**
+ * @route   POST /api/details
+ * @desc    Receives user details from the form
+ */
+router.post('/details', (req, res) => {
+    // Extract data from the request body
+    const { weight, height, gender, interestedSports } = req.body;
+
+    if (!weight || !height || !gender || !interestedSports) {
+        return res.status(400).send('Please fill out all fields.');
+    }
+
+    const newUser = {
+        id: Date.now(), // Simple unique ID
+        weight,
+        height,
+        gender,
+        interestedSports,
+        submittedAt: new Date().toISOString()
+    };
+    
+    // Store the new user data (in memory)
+    usersData.push(newUser);
+    
+    console.log('Received new user details:');
+    console.log(newUser);
+    console.log('--- Current User List ---');
+    console.log(usersData);
+
+    // Redirect the user to the video upload page after successfully submitting details
+    res.redirect('/video.html');
+});
+
+
+/**
+ * @route   POST /api/upload
+ * @desc    Handles the video upload for the fitness test
+ */
+router.post('/upload', upload.single('fitnessVideo'), (req, res) => {
+    // 'upload.single('fitnessVideo')' middleware handles the file saving.
+    // 'fitnessVideo' is the 'name' attribute of the file input in the HTML form.
+    
+    // Check if a file was actually uploaded
+    if (!req.file) {
+        return res.status(400).send('No video file uploaded.');
+    }
+
+    console.log(`Video uploaded successfully: ${req.file.path}`);
+    
+    // Send a success response back to the client
+    res.status(200).send(`
+        <html>
+            <head>
+                <title>Upload Successful</title>
+                <style>
+                    body { font-family: sans-serif; text-align: center; padding: 50px; }
+                    h1 { color: #28a745; }
+                    p { font-size: 1.2em; }
+                    a { color: #007bff; text-decoration: none; }
+                </style>
+            </head>
+            <body>
+                <h1>Fitness Video Uploaded Successfully!</h1>
+                <p>Your file <strong>${req.file.originalname}</strong> has been saved.</p>
+                <p>The AI model processing will be attached to this step later.</p>
+                <a href="/">Submit Another User</a>
+            </body>
+        </html>
+    `);
+});
+
+// Export the router to be used in server.js
+module.exports = router;

@@ -1,0 +1,44 @@
+// Import necessary modules
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const userRoutes = require('./routes/userRoutes');
+
+// Initialize the Express application
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// --- Middleware ---
+// To parse JSON bodies
+app.use(express.json());
+// To parse URL-encoded bodies (as sent by HTML forms)
+app.use(express.urlencoded({ extended: true }));
+// Serve static files (like HTML, CSS, client-side JS) from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+// --- Create necessary directories ---
+// Create an 'uploads' directory if it doesn't exist for storing videos
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+    console.log("Created 'uploads' directory.");
+}
+
+
+// --- API Routes ---
+// Use the user routes for any requests to '/api'
+app.use('/api', userRoutes);
+
+
+// --- Root Route ---
+// Serve the main user input form when the root URL is accessed
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
+// --- Start the Server ---
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});

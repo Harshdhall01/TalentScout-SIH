@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Test - Video Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        input[type="file"] {
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        input[type="file"]::file-selector-button {
+            margin-right: 20px;
+            border: none;
+            background: #007bff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color .2s ease-in-out;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background: #0056b3;
+        }
+        button {
+            width: 100%;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #28a745;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Fitness Test Video</h1>
+        <p>Please upload a video of you performing the required exercises.</p>
+        <!-- The 'enctype' is crucial for file uploads -->
+        <form action="/api/upload" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <!-- 'name' attribute must match what multer expects ('fitnessVideo') -->
+                <input type="file" id="fitnessVideo" name="fitnessVideo" accept="video/*" required>
+            </div>
+            <button type="submit">Upload and Finish</button>
+        </form>
+    </div>
+</body>
+</html>
